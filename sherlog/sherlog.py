@@ -3,6 +3,9 @@ from flask import g
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from unrest import UnRest
+
+from .model import Log
 
 class Sherlog(Flask):
     def create_session(self):
@@ -13,3 +16,7 @@ class Sherlog(Flask):
 
     def initialize(self):
         self.before_request(self.before)
+
+        rest = UnRest(self, self.create_session())
+
+        rest(Log, methods=['GET'])
