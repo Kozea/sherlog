@@ -9,7 +9,7 @@ class Log(Base):
 
     id = Column(Integer, primary_key=True)
 
-    return_code = Column(Integer, nullable=False)
+    return_code = Column(Integer, nullable=True)
     message = Column(String, nullable=False)
     url = Column(String, nullable=True)
     ok = Column(Boolean, nullable=False)
