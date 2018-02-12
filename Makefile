@@ -25,10 +25,10 @@ clean-install: clean
 	rm -fr *.egg-info
 
 lint:
-	$(PYTEST) --no-cov --flake8 -m flake8
-	$(PYTEST) --no-cov --isort -m isort
+	$(PYTEST) --flake8 --isort -m "flake8 or isort" $(PROJECT_NAME)
 
-check-python: lint
+check-python:
+	FLASK_CONFIG=$(FLASK_CONFIG) $(PYTEST) $(PROJECT_NAME) $(PYTEST_ARGS)
 
 check-outdated:
 	$(PIP) list --outdated --format=columns
