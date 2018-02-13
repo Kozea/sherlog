@@ -1,22 +1,22 @@
 import datetime
 
-from sherlog import sherlog
+from sherlog import log_parser
 
 
 def test_get_name_service(one_line_service):
     title = one_line_service.split('(')[0]
-    assert sherlog.get_name(title) == 'Anne-Laure'
+    assert log_parser.get_name(title) == 'Anne-Laure'
 
 
 def test_get_name_ping(one_line_ping):
     title = one_line_ping.split('(')[0]
-    assert sherlog.get_name(title) == 'Anne-Laure'
+    assert log_parser.get_name(title) == 'Anne-Laure'
 
 
 def test_convert_to_dict_service(one_line_service):
     title = one_line_service.split('(')[0]
     assert (
-        sherlog.convert_to_dict(one_line_service.split(title)[1]) == 
+        log_parser.convert_to_dict(one_line_service.split(title)[1]) == 
         {
             'response': {
                 'code': 200,
@@ -37,7 +37,7 @@ def test_convert_to_dict_service(one_line_service):
 def test_convert_to_dict_ping(one_line_ping):
     title = one_line_ping.split('(')[0]
     assert (
-        sherlog.convert_to_dict(one_line_ping.split(title)[1]) == {
+        log_parser.convert_to_dict(one_line_ping.split(title)[1]) == {
             'end': datetime.datetime(2018, 2, 9, 11, 20, 48, 976649),
             'status': 'info',
             'response': {
@@ -56,10 +56,10 @@ def test_convert_to_dict_ping(one_line_ping):
 
 def test_build_log_service(one_line_service):
     title = one_line_service.split('(')[0]
-    server_name = sherlog.get_name(title)
-    desc = sherlog.convert_to_dict(one_line_service.split(title)[1])
+    server_name = log_parser.get_name(title)
+    desc = log_parser.convert_to_dict(one_line_service.split(title)[1])
     assert (
-        sherlog.build_log(server_name, desc) == {
+        log_parser.build_log(server_name, desc) == {
             'return_code': 200,
             'message': 'Status code is 200',
             'url': 'https://51.15.12.125',
@@ -78,10 +78,10 @@ def test_build_log_service(one_line_service):
 
 def test_build_log_ping(one_line_ping):
     title = one_line_ping.split('(')[0]
-    server_name = sherlog.get_name(title)
-    desc = sherlog.convert_to_dict(one_line_ping.split(title)[1])
+    server_name = log_parser.get_name(title)
+    desc = log_parser.convert_to_dict(one_line_ping.split(title)[1])
     assert (
-        sherlog.build_log(server_name, desc) == {
+        log_parser.build_log(server_name, desc) == {
             'return_code': 0,
             'message': 'No message',
             'url': None,
