@@ -5,7 +5,7 @@ import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sherlog import model
+from sherlog.model import Log
 
 
 def get_config():
@@ -23,7 +23,7 @@ def get_session(config):
 
 
 def convert_to_dict(data):
-    return eval(data[1:-2].replace('\n', ''))
+    return eval(data[1:-1].replace('\n', ''))
 
 
 def get_name(data):
@@ -56,7 +56,7 @@ def insert_log(line, dbsession):
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        dbsession.add(model.Log(build_log(server_name, desc)))
+        dbsession.add(Log(build_log(server_name, desc)))
 
 
 def read_log(logfile):
