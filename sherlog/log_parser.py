@@ -56,7 +56,7 @@ def insert_log(line, dbsession):
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        log = Log(build_log(server_name, desc))
+        log = Log(**build_log(server_name, desc))
         dbsession.add(log)
         dbsession.commit()
 
