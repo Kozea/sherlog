@@ -1,16 +1,19 @@
 import configparser
-import datetime
+# datetime is needed because log contains datetime object
+import datetime  # noqa
 import os
 import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from sherlog.model import Log
 
 
 def get_config():
     config_path = os.path.dirname(os.path.abspath(__file__))
-    path = os.getenv('PARSER_CFG', os.path.join(config_path, 'application.ini'))
+    path = os.getenv(
+        'PARSER_CFG', os.path.join(config_path, 'application.ini'))
     config = configparser.ConfigParser()
     config.read(path)
     return config
