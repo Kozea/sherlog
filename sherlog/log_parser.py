@@ -23,7 +23,7 @@ def get_session(config):
 
 
 def convert_to_dict(data):
-    return eval(data[1:-1].replace('\n', ''))
+    return eval(data.rstrip()[1:-1].replace('\n', ''))
 
 
 def get_name(data):
@@ -56,7 +56,9 @@ def insert_log(line, dbsession):
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        dbsession.add(Log(build_log(server_name, desc)))
+        log = Log(build_log(server_name, desc))
+        dbsession.add(log)
+        dbsession.commit()
 
 
 def read_log(logfile):
