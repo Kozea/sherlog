@@ -2,14 +2,14 @@ import configparser
 # datetime is needed because log contains datetime object
 import datetime  # noqa
 import os
-import time
 
 from sqlalchemy import create_engine
-from sqlalchemy.exc import InvalidRequestError, IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.orm import sessionmaker
 
 from sherlog.model import Log
 from sherlog.tail import LogTail
+
 
 def get_config():
     config_path = os.path.dirname(os.path.abspath(__file__))
@@ -48,9 +48,12 @@ def build_log(server_name, desc):
         'start': desc.get('start'),
         'stop': desc.get('end'),
         'status': desc.get('status'),
-        'stderr': response.get('stderr').decode('utf-8') if response.get('stderr', None) else None,
-        'stdout': response.get('stdout').decode('utf-8') if response.get('stdout', None) else None,
-        'command': ' '.join(response.get('command', None)) if response.get('command', None) else None,
+        'stderr': (response.get('stderr').decode('utf-8')
+                   if response.get('stderr', None) else None),
+        'stdout': (response.get('stdout').decode('utf-8')
+                   if response.get('stdout', None) else None),
+        'command': (' '.join(response.get('command', None))
+                    if response.get('command', None) else None),
         'server_name': server_name
     }
 
