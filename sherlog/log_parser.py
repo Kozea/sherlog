@@ -5,10 +5,11 @@ import os
 import time
 
 from sqlalchemy import create_engine
+from sqlalchemy.exc import InvalidRequestError, IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from sherlog.model import Log
-
+from sherlog.tail import LogTail
 
 def get_config():
     config_path = os.path.dirname(os.path.abspath(__file__))
@@ -47,9 +48,9 @@ def build_log(server_name, desc):
         'start': desc.get('start'),
         'stop': desc.get('end'),
         'status': desc.get('status'),
-        'stderr': response.get('stderr', None),
-        'stdout': response.get('stdout', None),
-        'command': response.get('command', None),
+        'stderr': response.get('stderr').decode('utf-8') if response.get('stderr', None) else None,
+        'stdout': response.get('stdout').decode('utf-8') if response.get('stdout', None) else None,
+        'command': ' '.join(response.get('command', None)) if response.get('command', None) else None,
         'server_name': server_name
     }
 
@@ -64,20 +65,19 @@ def insert_log(line, dbsession):
         dbsession.commit()
 
 
-def read_log(logfile):
-    logfile.seek(0, 2)
-    while True:
-        line = logfile.readline()
-        if not line:
-            time.sleep(0.1)
-            continue
-        yield(line)
+def insert_missing_lines(dbsession, logfile):
+    with open(logfile, 'r') as fd:
+        for line in fd:
+            try:
+                insert_log(line, dbsession)
+            except (InvalidRequestError, IntegrityError) as e:
+                pass
 
 
 if __name__ == '__main__':
     config = get_config()
     dbsession = get_session(config)
-    logfile = open(config['DEFAULT'].get('LOGFILE'), 'r')
-    loglines = read_log(logfile)
-    for line in loglines:
+    insert_missing_lines(dbsession, config['DEFAULT'].get('LOGFILE'))
+    fd = LogTail(config['DEFAULT'].get('LOGFILE'))
+    for line in fd.tail():
         insert_log(line, dbsession)

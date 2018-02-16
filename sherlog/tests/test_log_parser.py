@@ -96,15 +96,15 @@ def test_build_log_ping(one_line_ping):
             'start': datetime.datetime(2018, 2, 9, 11, 20, 48, 952867),
             'stop': datetime.datetime(2018, 2, 9, 11, 20, 48, 976649),
             'status': 'info',
-            'stderr': b'',
+            'stderr': None,
             'stdout': (
-                b'PING 2001:bc8:3261:500::1(2001:bc8:3261:500::1) '
-                b'56 data bytes64 bytes from 2001:bc8:3261:500::1: '
-                b'icmp_seq=1 ttl=58 time=13.0 ms--- 2001:bc8:3261:500::1 '
-                b'ping statistics ---1 packets transmitted, 1 received, '
-                b'0% packet loss, time 0msrtt min/avg/max/mdev = '
-                b'13.072/13.072/13.072/0.000 ms'
+                'PING 2001:bc8:3261:500::1(2001:bc8:3261:500::1) '
+                '56 data bytes64 bytes from 2001:bc8:3261:500::1: '
+                'icmp_seq=1 ttl=58 time=13.0 ms--- 2001:bc8:3261:500::1 '
+                'ping statistics ---1 packets transmitted, 1 received, '
+                '0% packet loss, time 0msrtt min/avg/max/mdev = '
+                '13.072/13.072/13.072/0.000 ms'
             ),
-            'command': ['ping6', '-c1', '-W3', '2001:bc8:3261:500::1'],
+            'command': 'ping6 -c1 -W3 2001:bc8:3261:500::1',
             'server_name': 'Anne-Laure'
         })
