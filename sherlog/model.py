@@ -7,14 +7,12 @@ Base = declarative_base()
 class Log(Base):
     __tablename__ = 'log'
 
-    id = Column(Integer, primary_key=True)
-
     return_code = Column(Integer, nullable=True)
     message = Column(String, nullable=False)
     url = Column(String, nullable=True)
     ok = Column(Boolean, nullable=False)
     host = Column(String, nullable=True)
-    start = Column(DateTime, nullable=False)
+    start = Column(DateTime, primary_key=True)
     stop = Column(DateTime, nullable=False)
     status = Column(String, nullable=False)
 
