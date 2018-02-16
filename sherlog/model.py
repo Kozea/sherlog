@@ -11,7 +11,7 @@ class Log(Base):
     message = Column(String, nullable=False)
     url = Column(String, nullable=True)
     ok = Column(Boolean, nullable=False)
-    host = Column(String, nullable=True)
+    host = Column(String, nullable=True, index=True)
     start = Column(DateTime, primary_key=True)
     stop = Column(DateTime, nullable=False)
     status = Column(String, nullable=False)
@@ -20,4 +20,4 @@ class Log(Base):
     stdout = Column(String, nullable=True)
     command = Column(String, nullable=True)
 
-    server_name = Column(String, nullable=False)
+    server_name = Column(String, nullable=False, index=True)
