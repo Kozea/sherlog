@@ -23,6 +23,7 @@ setup(
     install_requires=[
         'alembic',
         'flask',
+        'pygal',
         'sqlalchemy',
         'unrest',
     ],
