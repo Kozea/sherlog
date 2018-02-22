@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unrest import UnRest
 
+from sherlog import graph
 from sherlog.model import Log
 
 
@@ -13,6 +14,9 @@ class Sherlog(Flask):
 
         self.before_request(self.before)
 
+        self.route('/graph/<server_name>/<interval>/<ping_service>',
+                   methods=['GET', 'POST'])(get_graph)
+
         rest = UnRest(self, self.create_session())
         rest(Log, methods=['GET'])
 
@@ -21,6 +25,10 @@ class Sherlog(Flask):
 
     def before(self):
         g.session = self.create_session()
+
+
+def get_graph(server_name, interval, ping_service):
+    graph.build_graph(server_name, interval, ping_service)
 
 
 app = Sherlog(__name__)
