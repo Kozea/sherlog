@@ -30,7 +30,7 @@ class Sherlog(Flask):
 
 
 def get_graph(ping_service, server_name=''):
-    graph.build_graph(server_name, ping_service)
+    return graph.build_graph(server_name, ping_service)
 
 
 app = Sherlog(__name__)

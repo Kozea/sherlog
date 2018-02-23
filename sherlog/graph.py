@@ -42,7 +42,7 @@ def get_data(server_name, ping_service, start):
         data = (
             dbsession.query(Log)
             .filter(Log.server_name == server_name)
-            .filter(Log.command.contains('ping'))
+            .filter(Log.command.contains('ping '))
             .filter(Log.start > start)
             .all()
         )
@@ -50,7 +50,7 @@ def get_data(server_name, ping_service, start):
         data = (
             dbsession.query(Log)
             .filter(Log.host == ping_service)
-            .filter(Log.command == '')
+            .filter(Log.command == None)
             .filter(Log.start > start)
             .all()
         )
@@ -73,4 +73,4 @@ def build_graph(server_name, ping_service):
         group = list(group)
         data.append(float(compute_ok_percent(group, len(group))))
         data_range.append(key)
-    gen_graph(data, data_range, server_name + ping_service)
+    return gen_graph(data, data_range, server_name + ' ' + ping_service)
