@@ -16,6 +16,8 @@ class Sherlog(Flask):
 
         self.route('/graph/<server_name>/<ping_service>',
                    methods=['GET', 'POST'])(get_graph)
+        self.route('/graph/<ping_service>',
+                   methods=['GET', 'POST'])(get_graph)
 
         rest = UnRest(self, self.create_session())
         rest(Log, methods=['GET'])
@@ -27,7 +29,7 @@ class Sherlog(Flask):
         g.session = self.create_session()
 
 
-def get_graph(server_name, ping_service):
+def get_graph(ping_service, server_name=''):
     graph.build_graph(server_name, ping_service)
 
 
