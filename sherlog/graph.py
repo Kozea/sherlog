@@ -1,9 +1,8 @@
 import datetime
+from itertools import groupby
 
 import pygal
 
-from itertools import groupby
-from operator import attrgetter
 from sherlog.log_parser import get_config, get_session
 from sherlog.model import Log
 
@@ -18,7 +17,7 @@ def gen_graph(data, date_range, title):
 
 def compute_ok_percent(data, occurences):
     ok_true = [x.ok for x in data].count(True)
-    return '%.2f'%(ok_true * 100 / occurences)
+    return '%.2f' % (ok_true * 100 / occurences)
 
 
 def build_list_ping(data):
@@ -59,7 +58,6 @@ def get_data(server_name, ping_service, start):
 
 
 def build_graph(server_name, interval, ping_service):
-    current_date = datetime.datetime.now()
     begin_month = datetime.datetime.today().replace(
         day=1, hour=0, minute=0, second=0, microsecond=0)
     data = get_data(server_name, ping_service, begin_month)
@@ -68,10 +66,10 @@ def build_graph(server_name, interval, ping_service):
     else:
         build_data = build_list_service(data)
     build_data.sort(key=lambda data: data.start.day)
-    grouped_by_days = groupby(build_data, lambda data:data.start.day)
+    grouped_by_days = groupby(build_data, lambda data: data.start.day)
     data = []
     data_range = []
-    for key,group in grouped_by_days:
+    for key, group in grouped_by_days:
         group = list(group)
         data.append(float(compute_ok_percent(group, len(group))))
         data_range.append(key)
