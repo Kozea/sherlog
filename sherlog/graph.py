@@ -57,7 +57,7 @@ def get_data(server_name, ping_service, start):
     return data
 
 
-def build_graph(server_name, interval, ping_service):
+def build_graph(server_name, ping_service):
     begin_month = datetime.datetime.today().replace(
         day=1, hour=0, minute=0, second=0, microsecond=0)
     data = get_data(server_name, ping_service, begin_month)
