@@ -6,6 +6,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql.expression import func
 
 from sherlog.model import Log
 from sherlog.tail import LogTail
@@ -58,29 +59,37 @@ def build_log(server_name, desc):
     }
 
 
-def insert_log(line, dbsession):
+def get_max_stop(dbsession):
+    date = dbsession.query(func.max(Log.stop)).first()[0]
+    if date is None:
+        return datetime.datetime.min
+    else:
+        return date
+
+
+def insert_log(line, dbsession, max_stop):
     if 'Archive' not in line:
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        log = Log(**build_log(server_name, desc))
-        dbsession.add(log)
-        dbsession.commit()
+        if desc['end'] > max_stop:
+            log = Log(**build_log(server_name, desc))
+            dbsession.add(log)
 
 
 def insert_missing_lines(dbsession, logfile):
+    max_stop = get_max_stop(dbsession)
     with open(logfile, 'r') as fd:
         for line in fd:
-            try:
-                insert_log(line, dbsession)
-            except (InvalidRequestError, IntegrityError) as e:
-                pass
+            insert_log(line, dbsession, max_stop)
+    dbsession.commit()
 
 
 if __name__ == '__main__':
     config = get_config()
     dbsession = get_session(config)
     insert_missing_lines(dbsession, config['DEFAULT'].get('LOGFILE'))
-    fd = LogTail(config['DEFAULT'].get('LOGFILE'))
-    for line in fd.tail():
-        insert_log(line, dbsession)
+#    fd = LogTail(config['DEFAULT'].get('LOGFILE'))
+#    for line in fd.tail():
+#        insert_log(line, dbsession)
+#        dbsession.commit()
