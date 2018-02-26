@@ -6,10 +6,6 @@ from urllib.parse import urlparse
 from .app import app
 
 
-locale.setlocale(locale.LC_ALL, 'fr_FR')
-
-
-# @app.cli.command()
 def drop_db():
     filename = urlparse(app.config['DB']).path
     if os.path.isfile(filename):
