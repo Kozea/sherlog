@@ -12,6 +12,7 @@ def gen_graph(data, date_range, title):
     line_chart.title = title
     line_chart.x_labels = map(str, date_range)
     line_chart.add('', data)
+    line_chart.range = [0, 100]
     return line_chart.render_response()
 
 
