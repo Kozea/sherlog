@@ -16,9 +16,9 @@ def gen_graph(data, date_range, title):
     return line_chart.render_response()
 
 
-def compute_ok_percent(data, occurences):
-    ok_true = [x.ok for x in data].count(True)
-    return '%.2f' % (ok_true * 100 / occurences)
+def compute_status_percent(data, occurences):
+    status_info = [x.status for x in data].count('info')
+    return '%.2f' % (status_info * 100 / occurences)
 
 
 def build_list_ping(data):
@@ -51,27 +51,39 @@ def get_data(server_name, ping_service, start):
         data = (
             dbsession.query(Log)
             .filter(Log.host == ping_service)
-            .filter(Log.command == None)
+            .filter(Log.command == None) # noqa
             .filter(Log.start > start)
             .all()
         )
     return data
 
 
-def build_graph(server_name, ping_service):
-    begin_month = datetime.datetime.today().replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0)
-    data = get_data(server_name, ping_service, begin_month)
+def build_graph(server_name, ping_service, interval, begin, group):
+    data = get_data(server_name, ping_service, begin)
     if 'ping' in ping_service:
         build_data = build_list_ping(data)
     else:
         build_data = build_list_service(data)
-    build_data.sort(key=lambda data: data.start.day)
-    grouped_by_days = groupby(build_data, lambda data: data.start.day)
+    build_data.sort(key=group)
+    grouped_by_days = groupby(build_data, group)
     data = []
     data_range = []
     for key, group in grouped_by_days:
         group = list(group)
-        data.append(float(compute_ok_percent(group, len(group))))
+        data.append(float(compute_status_percent(group, len(group))))
         data_range.append(key)
-    return gen_graph(data, data_range, server_name + ' ' + ping_service)
+    title = server_name + ' ' + ping_service if server_name else ping_service
+    return gen_graph(data, data_range, title)
+
+
+def main(ping_service, server_name, interval):
+    if not interval:
+        begin = datetime.datetime.today().replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0)
+        return build_graph(server_name, ping_service, interval,
+                           begin, lambda data: data.start.day)
+    elif interval == 'day':
+        begin = datetime.datetime.today().replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        return build_graph(server_name, ping_service, interval,
+                           begin, lambda data: data.start.hour)

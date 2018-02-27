@@ -1,4 +1,3 @@
-import locale
 import os
 
 from urllib.parse import urlparse
