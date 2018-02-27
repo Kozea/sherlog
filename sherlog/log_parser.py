@@ -89,7 +89,7 @@ if __name__ == '__main__':
     config = get_config()
     dbsession = get_session(config)
     insert_missing_lines(dbsession, config['DEFAULT'].get('LOGFILE'))
-#    fd = LogTail(config['DEFAULT'].get('LOGFILE'))
-#    for line in fd.tail():
-#        insert_log(line, dbsession)
-#        dbsession.commit()
+    fd = LogTail(config['DEFAULT'].get('LOGFILE'))
+    for line in fd.tail():
+        insert_log(line, dbsession)
+        dbsession.commit()
