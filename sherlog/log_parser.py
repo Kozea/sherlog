@@ -75,12 +75,16 @@ def insert_log(line, dbsession, max_stop):
             log = Log(**build_log(server_name, desc))
             dbsession.add(log)
 
-
 def insert_missing_lines(dbsession, logfile):
     max_stop = get_max_stop(dbsession)
+    count = 0
     with open(logfile, 'r') as fd:
         for line in fd:
+            count += 1
             insert_log(line, dbsession, max_stop)
+            if count == 100000:
+                dbsession.commit()
+                count = 0
     dbsession.commit()
 
 
