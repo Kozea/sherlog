@@ -2,6 +2,7 @@ import configparser
 # datetime is needed because log contains datetime object
 import datetime  # noqa
 import os
+from threading import Thread
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -75,7 +76,10 @@ def insert_log(line, dbsession, max_stop):
             log = Log(**build_log(server_name, desc))
             dbsession.add(log)
 
-def insert_missing_lines(dbsession, logfile):
+def insert_missing_lines():
+    config = get_config()
+    dbsession = get_session(config)
+    logfile = config['DEFAULT'].get('LOGFILE')
     max_stop = get_max_stop(dbsession)
     count = 0
     with open(logfile, 'r') as fd:
@@ -88,11 +92,14 @@ def insert_missing_lines(dbsession, logfile):
     dbsession.commit()
 
 
-if __name__ == '__main__':
+def insert_new_lines():
     config = get_config()
     dbsession = get_session(config)
-    insert_missing_lines(dbsession, config['DEFAULT'].get('LOGFILE'))
     fd = LogTail(config['DEFAULT'].get('LOGFILE'))
     for line in fd.tail():
         insert_log(line, dbsession)
         dbsession.commit()
+
+if __name__ == '__main__':
+    Thread(target = insert_missing_lines).start()
+    Thread(target = insert_new_lines).start()
