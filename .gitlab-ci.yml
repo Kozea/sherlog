@@ -1,0 +1,66 @@
+cache:
+   key: "$CI_COMMIT_REF_NAME"
+   untracked: true
+
+variables:
+  PYTHON_VERSION: python
+  STAGING: y
+
+stages:
+  - install
+  - build
+  - test
+  - deploy_prod
+
+.artifacts: &artifacts
+  artifacts:
+    paths:
+      - .env/
+
+.image_test: &image_test
+  image: paradoxxxzero/python-node-yarn-postgresql:latest
+
+install:
+  stage: install
+  <<: *image_test
+  script:
+    - make install
+  <<: *artifacts
+
+build:
+  stage: build
+  <<: *image_test
+  script:
+    - make build
+  dependencies:
+    - install
+  <<: *artifacts
+
+lint:
+  stage: test
+  <<: *image_test
+  script:
+    - make lint
+  dependencies:
+    - build
+
+test:
+  stage: test
+  <<: *image_test
+  script:
+    - make check
+  dependencies:
+    - build
+
+deploy_prod:
+  stage: deploy_prod
+  before_script:
+    - "apt-get update && apt-get install -y jq curl"
+  script:
+    - "res_curl=`curl --http1.1 -m 3600 -H 'Content-Type: application/json' -X POST -d '{\"job_id\":\"'\"$CI_JOB_ID\"'\", \"token\":\"\'\"$TOKEN\"\'\", \"build_stage\":\"\'\"$CI_JOB_STAGE\"\'\", \"project_name\":\"\'\"$CI_PROJECT_NAME\"\'\", \"branch\":\"\'\"$CI_COMMIT_REF_NAME\"\'\"}' $JUNKRAT | jq -r \'.success\'`"
+    - "if [[ $res_curl = 1 ]]; then exit $res_curl;fi"
+    - "get=`curl -s -o -I -w \"%{http_code}\" https://sherlog.kozea.fr/graph/Anne-Laure/ping6`"
+    - "([[ $get = 302 || $get = 200 ]] && [[ $res_curl = 0 ]]) && exit_val=0 || exit_val=1 && exit $exit_val"
+  dependencies: []
+  only:
+    - master
