@@ -67,12 +67,12 @@ def get_max_stop(dbsession):
         return date
 
 
-def insert_log(line, dbsession, max_stop=None):
+def insert_log(line, dbsession, max_stop):
     if 'Archive' not in line:
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        if max_stop and desc['end'] > max_stop:
+        if desc['end'] > max_stop:
             log = Log(**build_log(server_name, desc))
             dbsession.add(log)
 
@@ -96,9 +96,11 @@ def insert_new_lines():
     config = get_config()
     dbsession = get_session(config)
     fd = LogTail(config['DEFAULT'].get('LOGFILE'))
+    max_stop = datetime.datetime.min
     for line in fd.tail():
-        insert_log(line, dbsession)
+        insert_log(line, dbsession, max_stop)
         dbsession.commit()
+
 
 if __name__ == '__main__':
     Thread(target = insert_missing_lines).start()
