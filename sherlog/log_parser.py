@@ -67,12 +67,12 @@ def get_max_stop(dbsession):
         return date
 
 
-def insert_log(line, dbsession, max_stop):
+def insert_log(line, dbsession, max_stop=None):
     if 'Archive' not in line:
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        if desc['end'] > max_stop:
+        if max_stop and desc['end'] > max_stop:
             log = Log(**build_log(server_name, desc))
             dbsession.add(log)
 
