@@ -8,7 +8,6 @@ variables:
 
 stages:
   - install
-  - build
   - test
   - deploy_prod
 
@@ -27,22 +26,13 @@ install:
     - make install
   <<: *artifacts
 
-build:
-  stage: build
-  <<: *image_test
-  script:
-    - make build
-  dependencies:
-    - install
-  <<: *artifacts
-
 lint:
   stage: test
   <<: *image_test
   script:
     - make lint
   dependencies:
-    - build
+    - install
 
 test:
   stage: test
@@ -50,7 +40,7 @@ test:
   script:
     - make check
   dependencies:
-    - build
+    - install
 
 deploy_prod:
   stage: deploy_prod
