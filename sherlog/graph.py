@@ -2,8 +2,8 @@ import datetime
 from itertools import groupby
 
 import pygal
+from flask import g
 
-from sherlog.log_parser import get_config, get_session
 from sherlog.model import Log
 
 
@@ -30,10 +30,9 @@ def build_list_service(data):
 
 
 def get_data(server_name, ping_service, start):
-    dbsession = get_session(get_config())
     if 'ping6' in ping_service:
         data = (
-            dbsession.query(Log)
+            g.session.query(Log)
             .filter(Log.server_name == server_name)
             .filter(Log.command.contains('ping6'))
             .filter(Log.start > start)
@@ -41,7 +40,7 @@ def get_data(server_name, ping_service, start):
         )
     elif 'ping' in ping_service:
         data = (
-            dbsession.query(Log)
+            g.session.query(Log)
             .filter(Log.server_name == server_name)
             .filter(Log.command.contains('ping '))
             .filter(Log.start > start)
@@ -49,7 +48,7 @@ def get_data(server_name, ping_service, start):
         )
     else:
         data = (
-            dbsession.query(Log)
+            g.session.query(Log)
             .filter(Log.host == ping_service)
             .filter(Log.command == None) # noqa
             .filter(Log.start > start)
