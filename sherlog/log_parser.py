@@ -76,6 +76,7 @@ def insert_log(line, dbsession, max_stop):
             log = Log(**build_log(server_name, desc))
             dbsession.add(log)
 
+
 def insert_missing_lines():
     config = get_config()
     dbsession = get_session(config)
@@ -103,5 +104,5 @@ def insert_new_lines():
 
 
 if __name__ == '__main__':
-    Thread(target = insert_missing_lines).start()
-    Thread(target = insert_new_lines).start()
+    Thread(target = insert_missing_lines).start() # noqa
+    Thread(target = insert_new_lines).start() # noqa
