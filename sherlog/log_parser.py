@@ -72,8 +72,9 @@ def insert_log(line, dbsession, max_stop):
         title = line.split('(')[0]
         server_name = get_name(title)
         desc = convert_to_dict(line.split(title)[1])
-        log = Log(**build_log(server_name, desc))
-        dbsession.add(log)
+        if desc['end'] > max_stop:
+            log = Log(**build_log(server_name, desc))
+            dbsession.add(log)
 
 
 def insert_missing_lines():
