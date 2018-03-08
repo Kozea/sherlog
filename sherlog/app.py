@@ -2,9 +2,14 @@ from flask import Flask, g
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unrest import UnRest
+from werkzeug.routing import PathConverter
 
 from sherlog import graph
 from sherlog.model import Log
+
+
+class EverythingConverter(PathConverter):
+    regex = '.*?'
 
 
 class Sherlog(Flask):
@@ -14,14 +19,16 @@ class Sherlog(Flask):
 
         self.before_request(self.before)
 
+        self.url_map.converters['everything'] = EverythingConverter
+
         self.route('/graph/<server_name>/<ping_service>',
                    methods=['GET', 'POST'])(get_graph)
-        self.route('/graph/<ping_service>',
+        self.route('/graph/<everything:ping_service>',
                    methods=['GET', 'POST'])(get_graph)
 
         self.route('/graph/day/<server_name>/<ping_service>',
                    methods=['GET', 'POST'])(get_graph_day)
-        self.route('/graph/day/<ping_service>',
+        self.route('/graph/day/<everything:ping_service>',
                    methods=['GET', 'POST'])(get_graph_day)
 
         rest = UnRest(self, self.create_session())
