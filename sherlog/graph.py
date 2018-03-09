@@ -2,7 +2,7 @@ import datetime
 from itertools import groupby
 
 import pygal
-from flask import g
+from flask import g, jsonify
 
 from sherlog.model import Log
 
@@ -58,7 +58,7 @@ def get_data(server_name, ping_service, start):
 
 
 def build_graph(
-        server_name, ping_service, interval, begin, group, group_range):
+        server_name, ping_service, interval, begin, group, group_range, avg=None):
     data = get_data(server_name, ping_service, begin)
     if 'ping' in ping_service:
         build_data = build_list_ping(data)
@@ -73,16 +73,19 @@ def build_graph(
         data.append(float(compute_status_percent(group, len(group))))
         data_range.append(group_range(group[0].start))
     title = server_name + ' ' + ping_service if server_name else ping_service
-    return gen_graph(data, data_range, title)
+    if avg:
+        return jsonify({'avg': str(sum(data) / len(data))})
+    else:
+        return gen_graph(data, data_range, title)
 
 
-def main(ping_service, server_name, interval):
+def main(ping_service, server_name, interval, avg=None):
     if not interval:
         begin = datetime.datetime.today().replace(
             day=1, hour=0, minute=0, second=0, microsecond=0)
         return build_graph(server_name, ping_service, interval,
                            begin, lambda data: data.start.day,
-                           lambda x: x.date())
+                           lambda x: x.date(), avg)
     elif interval == 'day':
         begin = datetime.datetime.today().replace(
             hour=0, minute=0, second=0, microsecond=0)

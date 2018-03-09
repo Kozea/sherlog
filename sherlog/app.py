@@ -21,6 +21,12 @@ class Sherlog(Flask):
 
         self.url_map.converters['everything'] = EverythingConverter
 
+
+        self.route('/graph/avg/<server_name>/<ping_service>',
+                   methods=['GET', 'POST'])(get_graph_avg)
+        self.route('/graph/avg/<everything:ping_service>',
+                   methods=['GET', 'POST'])(get_graph_avg)
+
         self.route('/graph/<server_name>/<ping_service>',
                    methods=['GET', 'POST'])(get_graph)
         self.route('/graph/<everything:ping_service>',
@@ -43,6 +49,10 @@ class Sherlog(Flask):
 
 def get_graph(ping_service, server_name=None, interval=None):
     return graph.main(ping_service, server_name, interval)
+
+
+def get_graph_avg(ping_service, server_name=None, interval=None, avg=True):
+    return graph.main(ping_service, server_name, interval, avg)
 
 
 def get_graph_day(ping_service, server_name=None, interval='day'):
