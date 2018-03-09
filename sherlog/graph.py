@@ -57,20 +57,21 @@ def get_data(server_name, ping_service, start):
     return data
 
 
-def build_graph(server_name, ping_service, interval, begin, group):
+def build_graph(
+        server_name, ping_service, interval, begin, group, group_range):
     data = get_data(server_name, ping_service, begin)
     if 'ping' in ping_service:
         build_data = build_list_ping(data)
     else:
         build_data = build_list_service(data)
     build_data.sort(key=group)
-    grouped_by_days = groupby(build_data, group)
+    grouped = groupby(build_data, group)
     data = []
     data_range = []
-    for key, group in grouped_by_days:
+    for key, group in grouped:
         group = list(group)
         data.append(float(compute_status_percent(group, len(group))))
-        data_range.append(key)
+        data_range.append(group_range(group[0].start))
     title = server_name + ' ' + ping_service if server_name else ping_service
     return gen_graph(data, data_range, title)
 
@@ -80,9 +81,12 @@ def main(ping_service, server_name, interval):
         begin = datetime.datetime.today().replace(
             day=1, hour=0, minute=0, second=0, microsecond=0)
         return build_graph(server_name, ping_service, interval,
-                           begin, lambda data: data.start.day)
+                           begin, lambda data: data.start.day,
+                           lambda x: x.date())
     elif interval == 'day':
         begin = datetime.datetime.today().replace(
             hour=0, minute=0, second=0, microsecond=0)
         return build_graph(server_name, ping_service, interval,
-                           begin, lambda data: data.start.hour)
+                           begin, lambda data: data.start.hour,
+                           lambda x: x.time().replace(
+                               minute=0, second=0, microsecond=0))
