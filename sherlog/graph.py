@@ -58,7 +58,8 @@ def get_data(server_name, ping_service, start):
 
 
 def build_graph(
-        server_name, ping_service, interval, begin, group, group_range, avg=None):
+        server_name, ping_service, interval, begin,
+        group, group_range, avg=None):
     data = get_data(server_name, ping_service, begin)
     if 'ping' in ping_service:
         build_data = build_list_ping(data)
