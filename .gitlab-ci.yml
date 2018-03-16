@@ -1,7 +1,3 @@
-cache:
-   key: "$CI_COMMIT_REF_NAME"
-   untracked: true
-
 variables:
   PYTHON_VERSION: python
   STAGING: y
@@ -42,15 +38,21 @@ test:
   dependencies:
     - install
 
+.image: &image_deploy_jobs
+  image: debian:latest
+
 deploy_prod:
+  <<: *image_deploy_jobs
   stage: deploy_prod
   before_script:
-    - "apt-get update && apt-get install -y jq curl"
+    - 'apt-get update && apt-get install -y wget'
   script:
-    - "res_curl=`curl --http1.1 -m 3600 -H 'Content-Type: application/json' -X POST -d '{\"job_id\":\"'\"$CI_JOB_ID\"'\", \"token\":\"\'\"$TOKEN\"\'\", \"build_stage\":\"\'\"$CI_JOB_STAGE\"\'\", \"project_name\":\"\'\"$CI_PROJECT_NAME\"\'\", \"branch\":\"\'\"$CI_COMMIT_REF_NAME\"\'\"}' $JUNKRAT | jq -r \'.success\'`"
-    - "if [[ $res_curl = 1 ]]; then exit $res_curl;fi"
-    - "get=`curl -s -o -I -w \"%{http_code}\" https://sherlog.kozea.fr/graph/Anne-Laure/ping6`"
-    - "([[ $get = 302 || $get = 200 ]] && [[ $res_curl = 0 ]]) && exit_val=0 || exit_val=1 && exit $exit_val"
+    - 'set -e'
+    - 'output_file=/tmp/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.log'
+    - 'parameters="{\"job_id\":\"$CI_JOB_ID\", \"token\":\"$TOKEN\", \"build_stage\":\"$CI_JOB_STAGE\", \"project_name\":\"$CI_PROJECT_NAME\", \"branch\":\"$CI_COMMIT_REF_NAME\"}"'
+    - 'swget="wget --no-verbose --content-on-error -O-"'
+    - '$swget --header="Content-Type:application/json" --post-data="""$parameters""" $JUNKRAT | tee $output_file && [[ $(tail -n1 $output_file) == "Success" ]]'
+    - '$swget https://sherlog.kozea.fr/graph/Anne-Laure/ping6'
   dependencies: []
   only:
     - master
