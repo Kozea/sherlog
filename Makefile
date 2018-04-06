@@ -1,7 +1,24 @@
-include Makefile.config
--include Makefile.custom.config
+include config.Makefile
+-include config.custom.Makefile
+
+BASEVERSION ?= v1
+BASEROOT ?= https://raw.githubusercontent.com/Kozea/MakeCitron/$(BASEVERSION)/
+BASENAME := base.Makefile
+ifeq ($(MAKELEVEL), 0)
+RV := $(shell wget -q -O $(BASENAME) $(BASEROOT)$(BASENAME) || echo 'FAIL')
+ifeq (,$(RV))
+include $(BASENAME)
+else
+$(error Unable to download $(BASEROOT)$(BASENAME))
+endif
+$(info $(INFO))
+else
+include $(BASENAME)
+endif
+
 
 all: install serve
+	$(LOG)
 
 install:
 	test -d $(VENV) || virtualenv -p python3.6 $(VENV)
@@ -44,3 +61,11 @@ run:
 	env FLASK_DEBUG=1 $(VENV)/bin/flask run
 
 serve: run
+	$(LOG)
+
+deploy-prod:
+	$(LOG)
+	@echo "Communicating with Junkrat..."
+	@wget --no-verbose --content-on-error -O- --header="Content-Type:application/json" --post-data=$(subst $(newline),,$(JUNKRAT_PARAMETERS)) $(JUNKRAT) | tee $(JUNKRAT_RESPONSE)
+	if [[ $$(tail -n1 $(JUNKRAT_RESPONSE)) != "Success" ]]; then exit 9; fi
+	wget --no-verbose --content-on-error -O- $(URL_PROD)

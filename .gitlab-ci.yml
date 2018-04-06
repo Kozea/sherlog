@@ -45,14 +45,9 @@ deploy_prod:
   <<: *image_deploy_jobs
   stage: deploy_prod
   before_script:
-    - 'apt-get update && apt-get install -y wget'
+    - apt-get update && apt-get install -y wget make
   script:
-    - 'set -e'
-    - 'output_file=/tmp/$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME.log'
-    - 'parameters="{\"job_id\":\"$CI_JOB_ID\", \"token\":\"$TOKEN\", \"build_stage\":\"$CI_JOB_STAGE\", \"project_name\":\"$CI_PROJECT_NAME\", \"branch\":\"$CI_COMMIT_REF_NAME\"}"'
-    - 'swget="wget --no-verbose --content-on-error -O-"'
-    - '$swget --header="Content-Type:application/json" --post-data="""$parameters""" $JUNKRAT | tee $output_file && [[ $(tail -n1 $output_file) == "Success" ]]'
-    - '$swget https://sherlog.kozea.fr/graph/Anne-Laure/ping6'
+    - make deploy-prod
   dependencies: []
   only:
     - master
