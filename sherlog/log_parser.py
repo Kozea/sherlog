@@ -2,7 +2,6 @@ import configparser
 # datetime is needed because log contains datetime object
 import datetime  # noqa
 import os
-from threading import Thread
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -104,5 +103,4 @@ def insert_new_lines():
 
 
 if __name__ == '__main__':
-    Thread(target = insert_missing_lines).start() # noqa
-    Thread(target = insert_new_lines).start() # noqa
+    insert_new_lines()
