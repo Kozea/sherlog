@@ -29,7 +29,7 @@ def build_list_service(data):
     return [x for x in data if not x.command]
 
 
-def get_data(server_name, ping_service, start):
+def get_data(server_name, ping_service, start, stop):
     if 'ping6' in ping_service:
         data = (
             g.session.query(Log)
@@ -46,6 +46,15 @@ def get_data(server_name, ping_service, start):
             .filter(Log.start > start)
             .all()
         )
+    elif stop:
+        data = (
+            g.session.query(Log)
+            .filter(Log.host == ping_service)
+            .filter(Log.command == None) # noqa
+            .filter(Log.start > start)
+            .filter(Log.stop < stop)
+            .all()
+        )
     else:
         data = (
             g.session.query(Log)
@@ -59,8 +68,8 @@ def get_data(server_name, ping_service, start):
 
 def build_graph(
         server_name, ping_service, interval, begin,
-        group, group_range, avg=None):
-    data = get_data(server_name, ping_service, begin)
+        group, group_range, avg=None, stop=None):
+    data = get_data(server_name, ping_service, begin, stop)
     if 'ping' in ping_service:
         build_data = build_list_ping(data)
     else:
@@ -80,7 +89,8 @@ def build_graph(
         return gen_graph(data, data_range, title)
 
 
-def main(ping_service, server_name, interval, avg=None):
+def main(ping_service, server_name, interval, avg=None,
+         start_date=None, stop_date=None):
     if not interval:
         begin = datetime.datetime.today().replace(
             day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -94,3 +104,9 @@ def main(ping_service, server_name, interval, avg=None):
                            begin, lambda data: data.start.hour,
                            lambda x: x.time().replace(
                                minute=0, second=0, microsecond=0))
+    elif interval == 'custom':
+        begin = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
+        stop = datetime.datetime.strptime(stop_date, "%Y-%m-%d").date()
+        return build_graph(server_name, ping_service, interval,
+                           begin, lambda data: data.start.day,
+                           lambda x: x.date(), avg, stop)

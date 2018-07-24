@@ -36,6 +36,9 @@ class Sherlog(Flask):
         self.route('/graph/day/<everything:ping_service>',
                    methods=['GET', 'POST'])(get_graph_day)
 
+        self.route('/avg/<start_date>/<stop_date>/<ping_service>',
+                   methods=['GET'])(get_avg)
+
         rest = UnRest(self, self.create_session())
         rest(Log, methods=['GET'])
 
@@ -56,6 +59,13 @@ def get_graph_avg(ping_service, server_name=None, interval=None, avg=True):
 
 def get_graph_day(ping_service, server_name=None, interval='day'):
     return graph.main(ping_service, server_name, interval)
+
+
+def get_avg(ping_service, start_date, stop_date, avg=True,
+            server_name=None, interval='custom'):
+    return graph.main(
+        ping_service, server_name, interval, avg=avg,
+        start_date=start_date, stop_date=stop_date)
 
 
 app = Sherlog(__name__)
