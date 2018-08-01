@@ -34,7 +34,7 @@ def get_data(server_name, ping_service, start, stop):
         data = (
             g.session.query(Log)
             .filter(Log.server_name == server_name)
-            .filter(Log.command.contains('ping6'))
+            .filter(Log.command.contains('ping -6'))
             .filter(Log.start > start)
             .all()
         )
