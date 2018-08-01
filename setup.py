@@ -8,7 +8,7 @@ needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
 
 tests_requirements = [
-    'pytest',
+    'pytest==3.6.4',
     'pytest-cov',
     'pytest-factoryboy',
     'pytest-flake8',
